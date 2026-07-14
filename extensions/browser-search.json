@@ -1,8 +1,0 @@
-{
-  "MAX_RESULTS": 5,
-  "MAX_CHARS": 8000,
-  "MAX_LINKS": 25,
-  "NAV_TIMEOUT_MS": 30000,
-  "HEADLESS": true,
-  "BLOCK_MEDIA": true
-}
