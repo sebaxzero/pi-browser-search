@@ -174,9 +174,19 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("browser-search", {
-    description: "Show status; /browser-search set KEY=VAL [...]; /browser-search reset",
+    description: "Show status; /browser-search set KEY=VAL [...]; /browser-search save; /browser-search reset",
     handler: async (args, ctx) => {
       const trimmed = args?.trim() ?? "";
+
+      if (trimmed === "save") {
+        try {
+          writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2) + "\n", "utf-8");
+          ctx.ui.notify(`Browser Search: saved ${CONFIG_PATH}`, "info");
+        } catch (e) {
+          ctx.ui.notify(`Browser Search: could not save: ${e}`, "error");
+        }
+        return;
+      }
 
       if (trimmed === "reset") {
         await closeBrowser();
@@ -210,7 +220,7 @@ export default function (pi: ExtensionAPI) {
           }
         }
         if (needsRestart) await closeBrowser(); // relaunch picks up launch-time options
-        ctx.ui.notify(`Browser Search: ${results.join(", ")}`, "info");
+        ctx.ui.notify(`Browser Search: ${results.join(", ")} (session only; /browser-search save to persist)`, "info");
         return;
       }
 
@@ -220,7 +230,7 @@ export default function (pi: ExtensionAPI) {
           "",
           `  current page: ${currentUrl() || "(none)"}`,
           "",
-          "  config (/set = session only; edit browser-search.json for persistence):",
+          "  config (/set = session only; /browser-search save to persist):",
           ...Object.entries(cfg).map(([k, v]) => `    ${k}=${v}`),
           "",
           "  /browser-search reset — close the browser",

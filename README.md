@@ -108,6 +108,7 @@ Changes to the JSON take effect on the next session. For live tuning within a se
 ```
 /browser-search                 — show current status and config
 /browser-search set KEY=VAL     — override config for the current session only
+/browser-search save            — write the current config to browser-search.json
 /browser-search reset           — close the browser
 ```
 
