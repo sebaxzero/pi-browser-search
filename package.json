@@ -13,9 +13,6 @@
     "url": "https://github.com/sebaxzero/pi-browser-search/issues"
   },
   "type": "module",
-  "scripts": {
-    "test": "node --test test.mjs"
-  },
   "dependencies": {
     "playwright": "^1.53.0"
   },
