@@ -1,6 +1,5 @@
 # pi-browser-search
 
-[![test](https://github.com/sebaxzero/pi-browser-search/actions/workflows/test.yml/badge.svg)](https://github.com/sebaxzero/pi-browser-search/actions/workflows/test.yml)
 [![npm](https://img.shields.io/npm/v/pi-browser-search)](https://www.npmjs.com/package/pi-browser-search)
 
 A [pi](https://pi.dev) extension that adds `browser_search`, `browser_open`, `browser_act`, and `browser_read` tools backed by a real Playwright Chromium browser.
@@ -25,7 +24,30 @@ Add `-l` to either form to install project-locally (adds to `.pi/settings.json` 
 
 No manual setup: the `playwright` npm dependency installs automatically with the package, and the Chromium binary (~150 MB) downloads once on the first browser launch. To pre-download it instead, run `npx playwright install chromium` in the install directory.
 
+## Tools
+
+**`browser_search`** — Searches DuckDuckGo and returns titles, URLs, and snippets.
+
+Parameters:
+- `query` (required) — search query
+- `max_results` (optional) — number of results, default 5, max 10
+
+**`browser_open`** — Navigates to a URL and returns rendered text plus a link list.
+
+Parameters:
+- `url` (required) — must be http or https
+
+**`browser_act`** — Interacts with the currently open page: click, type, press, scroll, or wait_for.
+
+**`browser_read`** — Pages through the last snapshot's extracted text by character offset, no refetch.
+
 ## How it works
+
+### Browsing model
+
+The extension keeps one lazy-launched browser/context and one "current page." `browser_open` navigates and extracts text and links; `browser_act` clicks, types, presses keys, scrolls, or waits on that page; `browser_read` pages through the last extracted content by character offset without refetching. A click that opens a new tab switches to it, and dialogs are auto-dismissed.
+
+`browser_search` deliberately uses DuckDuckGo's static HTML endpoint over plain fetch — DDG bot-walls headless Chromium — so the browser is spent only on what needs it: rendering and interacting with pages.
 
 ### Sanitization pipeline (runs on every result)
 
@@ -52,32 +74,18 @@ Unlike a plain fetch-based tool, a rendered page can issue requests the model ne
 
 `browser_open` additionally validates the URL up front with descriptive errors before navigation starts.
 
-### Browsing model
+## Commands
 
-The extension keeps one lazy-launched browser/context and one "current page." `browser_open` navigates and extracts text and links; `browser_act` clicks, types, presses keys, scrolls, or waits on that page; `browser_read` pages through the last extracted content by character offset without refetching. A click that opens a new tab switches to it, and dialogs are auto-dismissed.
-
-`browser_search` deliberately uses DuckDuckGo's static HTML endpoint over plain fetch — DDG bot-walls headless Chromium — so the browser is spent only on what needs it: rendering and interacting with pages.
-
-## Tools
-
-**`browser_search`** — Searches DuckDuckGo and returns titles, URLs, and snippets.
-
-Parameters:
-- `query` (required) — search query
-- `max_results` (optional) — number of results, default 5, max 10
-
-**`browser_open`** — Navigates to a URL and returns rendered text plus a link list.
-
-Parameters:
-- `url` (required) — must be http or https
-
-**`browser_act`** — Interacts with the currently open page: click, type, press, scroll, or wait_for.
-
-**`browser_read`** — Pages through the last snapshot's extracted text by character offset, no refetch.
+```
+/browser-search                 — show current status and config
+/browser-search set KEY=VAL     — override config for the current session only
+/browser-search save            — write the current config to browser-search.json
+/browser-search reset           — close the browser
+```
 
 ## Configuration
 
-Persistent configuration lives in `extensions/browser-search.json` (auto-created on first load with defaults). You can ask the agent to edit it directly:
+Persistent configuration lives in `extensions/browser-search.json` next to the installed extension (auto-created on first load with defaults). You can ask the agent to edit it, or tune values live with `/browser-search set`.
 
 ```json
 {
@@ -99,47 +107,18 @@ Persistent configuration lives in `extensions/browser-search.json` (auto-created
 | `HEADLESS` | `true` | Set `false` to watch the browser window |
 | `BLOCK_MEDIA` | `true` | Skip loading images/media/fonts |
 
-Changing `HEADLESS` or `BLOCK_MEDIA` or `NAV_TIMEOUT_MS` closes the current browser so the next call relaunches with the new options.
-
-Changes to the JSON take effect on the next session. For live tuning within a session, use the command below.
-
-## Command
-
-```
-/browser-search                 — show current status and config
-/browser-search set KEY=VAL     — override config for the current session only
-/browser-search save            — write the current config to browser-search.json
-/browser-search reset           — close the browser
-```
+Changing `HEADLESS`, `BLOCK_MEDIA`, or `NAV_TIMEOUT_MS` closes the current browser so the next call relaunches with the new options.
 
 ## Compatibility
 
 Shares its sanitization and SSRF model with [pi-safe-search](https://github.com/sebaxzero/pi-safe-search) — install both if you want cheap static fetch for most pages and a real browser reserved for JS-heavy ones.
 
+For testing your **own** frontend (localhost, `file://`), use [pi-frontend-check](https://github.com/sebaxzero/pi-frontend-check) instead — this extension's SSRF protection deliberately blocks private addresses.
+
 ## Dependencies
 
 `playwright` (^1.53.0) — installed automatically with the package, whether via `pi install npm:` or a git-based install. The Chromium binary is downloaded separately on first browser launch (see Install above).
 
-## Tests
-
-```bash
-node --test test.mjs
-```
-
-17 tests covering IP range checks, URL validation, DuckDuckGo redirect
-unwrapping, and a sanitization smoke test. Pure logic lives in `net.ts` and
-`sanitize.ts` (no Playwright import), so the suite runs without a browser.
-CI runs it on every push and pull request.
-
-## Releasing
-
-Bump `version` in `package.json`, commit, tag `vX.Y.Z`, and push the tag —
-the publish workflow runs the tests and publishes to npm.
-
 ## License
 
 MIT
-
----
-
-Built with [Claude](https://claude.ai).
