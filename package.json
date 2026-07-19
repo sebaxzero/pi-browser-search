@@ -1,8 +1,19 @@
 {
   "name": "pi-browser-search",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Pi extension: web search and browsing through a real Playwright browser — JS-rendered pages, cookie walls, SPAs — with prompt-injection sanitization and network-level SSRF protection.",
-  "keywords": ["pi-package", "pi", "pi-coding-agent", "extension", "playwright", "browser", "web-search", "security", "prompt-injection", "ssrf"],
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-coding-agent",
+    "extension",
+    "playwright",
+    "browser",
+    "web-search",
+    "security",
+    "prompt-injection",
+    "ssrf"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/sebaxzero/pi-browser-search",
   "repository": {
@@ -17,7 +28,11 @@
     "playwright": "^1.53.0"
   },
   "pi": {
-    "extensions": ["./extensions"],
-    "skills": ["./skills"]
+    "extensions": [
+      "./extensions"
+    ],
+    "skills": [
+      "./skills"
+    ]
   }
 }
